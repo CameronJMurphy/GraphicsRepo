@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="OpenGLApplication.cpp" />
     <ClCompile Include="src\AABB.cpp" />
     <ClCompile Include="src\BoundingSphere.cpp" />
     <ClCompile Include="src\Camera.cpp" />
@@ -151,7 +152,10 @@
     <ClCompile Include="src\Gizmos.cpp" />
     <ClCompile Include="src\gl_core_4_4.c" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Mesh.cpp" />
+    <ClCompile Include="src\OBJMesh.cpp" />
     <ClCompile Include="src\Shader.cpp" />
+    <ClCompile Include="src\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AABB.h" />
@@ -162,13 +166,18 @@
     <ClInclude Include="inc\FlyCamera.h" />
     <ClInclude Include="inc\Gizmos.h" />
     <ClInclude Include="inc\gl_core_4_4.h" />
+    <ClInclude Include="inc\Mesh.h" />
+    <ClInclude Include="inc\OBJMesh.h" />
     <ClInclude Include="inc\OpenGLApplication.h" />
     <ClInclude Include="inc\Shader.h" />
-    <ClInclude Include="Mesh.h" />
+    <ClInclude Include="inc\Texture.h" />
+    <ClInclude Include="inc\tiny_obj_loader.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\simple.frag" />
     <None Include="shaders\simple.vert" />
+    <None Include="shaders\textured.frag" />
+    <None Include="shaders\textured.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

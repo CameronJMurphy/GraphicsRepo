@@ -57,6 +57,18 @@
     <ClCompile Include="src\FrustumPlanes.cpp">
       <Filter>Source Files\Scene Management</Filter>
     </ClCompile>
+    <ClCompile Include="OpenGLApplication.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\OBJMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\gl_core_4_4.h">
@@ -80,9 +92,6 @@
     <ClInclude Include="FrustumPlanes.h">
       <Filter>Header Files\Scene Management</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="inc\Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -92,12 +101,30 @@
     <ClInclude Include="inc\FlyCamera.h">
       <Filter>Header Files\Camera</Filter>
     </ClInclude>
+    <ClInclude Include="inc\Mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\Texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\OBJMesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\tiny_obj_loader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\simple.vert">
       <Filter>Shaders</Filter>
     </None>
     <None Include="shaders\simple.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\textured.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\textured.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
