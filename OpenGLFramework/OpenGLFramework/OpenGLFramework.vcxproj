@@ -174,6 +174,8 @@
     <ClInclude Include="inc\tiny_obj_loader.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\phong.frag" />
+    <None Include="shaders\phong.vert" />
     <None Include="shaders\simple.frag" />
     <None Include="shaders\simple.vert" />
     <None Include="shaders\textured.frag" />

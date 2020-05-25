@@ -52,6 +52,14 @@ private:
 	glm::mat4 quadTransform;
 	aie::Texture gridTexture;
 
+	struct Light {
+		glm::vec3 direction;
+		glm::vec3 diffuse;
+		glm::vec3 specular;
+	};
+
+	Light light;
+	glm::vec3 ambientLight;
 public:
 	bool Start();
 	bool Update();

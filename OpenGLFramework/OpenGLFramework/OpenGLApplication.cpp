@@ -44,8 +44,10 @@ bool OpenGlApplication::Start() {
 	//Shaders
 	/*shader.loadShader(aie::eShaderStage::VERTEX, "shaders/simple.vert");
 	shader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/simple.frag");*/
-	shader.loadShader(aie::eShaderStage::VERTEX, "shaders/textured.vert");
-	shader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/textured.frag");
+	//shader.loadShader(aie::eShaderStage::VERTEX, "shaders/textured.vert");
+	//shader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/textured.frag");
+	shader.loadShader(aie::eShaderStage::VERTEX, "shaders/phong.vert");
+	shader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/phong.frag");
 	if (shader.link() == false)
 	{
 		printf("Shader Error: %s\n", shader.getLastError());
@@ -60,7 +62,12 @@ bool OpenGlApplication::Start() {
 	//	printf("Soulspear Mesh Error!\n");
 	//	return false;
 	//}
-	if (bunnyMesh.load("meshes/soulspear/soulspear.obj",
+	//if (bunnyMesh.load("meshes/soulspear/soulspear.obj",
+	//	true, true) == false) {
+	//	printf("Soulspear Mesh Error!\n");
+	//	return false;
+	//}
+	if (bunnyMesh.load("meshes/stanford/Dragon.obj",
 		true, true) == false) {
 		printf("Soulspear Mesh Error!\n");
 		return false;
@@ -96,6 +103,10 @@ bool OpenGlApplication::Start() {
 	//unsigned char texelData[4] = { 0, 255, 255, 0 };
 	//texture2.create(2, 2, aie::Texture::RED, texelData);
 
+	light.diffuse = { 1, 1, 0 };
+	light.specular = { 1, 1, 0 };
+	ambientLight = { 0.25f, 0.25f, 0.25f };
+
 	return true;
 };
 bool OpenGlApplication::Update() {
@@ -106,6 +117,9 @@ bool OpenGlApplication::Update() {
 	oldTime = newTime;
 	newTime = glfwGetTime();
 	deltaTime = newTime - oldTime;
+	// rotate light
+	light.direction = glm::normalize(vec3(glm::cos(newTime * 2),
+		glm::sin(newTime * 2), 0));
 	//do stuff, all game logic and drawing
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	angle += 0.001f;
@@ -150,9 +164,18 @@ void OpenGlApplication::Draw() {
 	getFrustumPlanes(camera->GetProjection(), planes);
 
 	shader.bind();
+	shader.bindUniform("Ia", ambientLight);
+	shader.bindUniform("Id", light.diffuse);
+	shader.bindUniform("Is", light.specular);
+	shader.bindUniform("LightDirection", light.direction);
+
+	shader.bindUniform("cameraPosition",  camera->GetPosition());
 
 	auto pvm = camera->GetProjection() * quadTransform;
 	shader.bindUniform("ProjectionViewModel", pvm);
+
+	shader.bindUniform("NormalMatrix", glm::inverse(glm::mat3(quadTransform)));
+	//quadMesh.Draw();
 	//shader.bindUniform("diffuseTexture", 0);
 	gridTexture.bind(0);
 	bunnyMesh.draw();
