@@ -154,6 +154,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\OBJMesh.cpp" />
+    <ClCompile Include="src\RenderTarget.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\Texture.cpp" />
   </ItemGroup>
@@ -169,6 +170,7 @@
     <ClInclude Include="inc\Mesh.h" />
     <ClInclude Include="inc\OBJMesh.h" />
     <ClInclude Include="inc\OpenGLApplication.h" />
+    <ClInclude Include="inc\RenderTarget.h" />
     <ClInclude Include="inc\Shader.h" />
     <ClInclude Include="inc\Texture.h" />
     <ClInclude Include="inc\tiny_obj_loader.h" />

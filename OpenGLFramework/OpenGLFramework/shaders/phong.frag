@@ -14,7 +14,12 @@ uniform vec3 cameraPosition;
 
 uniform vec3 LightDirection;
 out vec4 FragColour;
+
+in vec2 vTexCoord;
+uniform sampler2D diffuseTexture;
+
 void main() {
+	vec3 diffuseColour = texture(diffuseTexture, vTexCoord).xyz;
 	// ensure normal and light direction are normalised
 	vec3 N = normalize(vNormal);
 	vec3 L = normalize(LightDirection);
@@ -28,8 +33,8 @@ void main() {
 
 	// calculate each colour property
 	vec3 ambient = Ia * Ka;
-	vec3 diffuse = Id * lambertTerm;
+	vec3 diffuse = Id * lambertTerm * diffuseColour;
 	vec3 specular = Is * Ks * specularTerm;
 	// output final colour
-	FragColour = vec4( ambient + diffuse, 1 );
+	FragColour = vec4( ambient + diffuse + specular, 1 );
 }

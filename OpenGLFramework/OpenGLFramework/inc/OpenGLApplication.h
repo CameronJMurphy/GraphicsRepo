@@ -21,6 +21,7 @@ using glm::mat4;
 #include <Texture.h>;
 #include <OBJMesh.h>
 #include <tiny_obj_loader.h>
+#include "RenderTarget.h"
 
 enum Side
 {
@@ -34,7 +35,7 @@ private:
 
 	GLFWwindow* window;
 	//set up camera
-	vec3 cameraPosition{ 0,100,-100 };
+	vec3 cameraPosition{ 0,10,-10 };
 	vec3 camera_target{ 0 };
 	float zoom = 0.9f;
 	//const float speed = 0.01f;
@@ -46,11 +47,18 @@ private:
 	float oldTime;
 	glm::vec4 plane;
 
-	aie::ShaderProgram shader;
-	Mesh quadMesh;
-	aie::OBJMesh bunnyMesh;
-	glm::mat4 quadTransform;
+	aie::ShaderProgram spearShader;
+	aie::OBJMesh spearMesh;
+	glm::mat4 spearTransform;
 	aie::Texture gridTexture;
+
+	aie::ShaderProgram grassShader;
+	Mesh grassMesh;
+	glm::mat4 grassTransform;
+	aie::Texture grassTexture;
+	
+
+	aie::RenderTarget renderTarget;
 
 	struct Light {
 		glm::vec3 direction;

@@ -46,33 +46,26 @@ bool OpenGlApplication::Start() {
 	shader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/simple.frag");*/
 	//shader.loadShader(aie::eShaderStage::VERTEX, "shaders/textured.vert");
 	//shader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/textured.frag");
-	shader.loadShader(aie::eShaderStage::VERTEX, "shaders/phong.vert");
-	shader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/phong.frag");
-	if (shader.link() == false)
+	spearShader.loadShader(aie::eShaderStage::VERTEX, "shaders/phong.vert");
+	spearShader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/phong.frag");
+	grassShader.loadShader(aie::eShaderStage::VERTEX, "shaders/textured.vert");
+	grassShader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/textured.frag");
+	if (spearShader.link() == false)
 	{
-		printf("Shader Error: %s\n", shader.getLastError());
+		printf("Shader Error: %s\n", spearShader.getLastError());
 		return false;
 	}
-	if (gridTexture.load("meshes/characters/Pyro/Pyro_D.tga") == false) {
-		printf("Failed to load texture!\n");
+	if (grassShader.link() == false)
+	{
+		printf("Shader Error: %s\n", spearShader.getLastError());
 		return false;
 	}
-	//if (bunnyMesh.load("meshes/stanford/Bunny.obj",
-	//	true, true) == false) {
-	//	printf("Soulspear Mesh Error!\n");
-	//	return false;
-	//}
-	//if (bunnyMesh.load("meshes/soulspear/soulspear.obj",
-	//	true, true) == false) {
-	//	printf("Soulspear Mesh Error!\n");
-	//	return false;
-	//}
-	if (bunnyMesh.load("meshes/stanford/Dragon.obj",
+	if (spearMesh.load("meshes/soulspear/soulspear.obj",
 		true, true) == false) {
 		printf("Soulspear Mesh Error!\n");
 		return false;
 	}
-	
+	grassTexture.load("meshes/grass.jpg");
 	// define 4 vertices for 2 triangles
 	//Mesh::Vertex vertices[4];
 	//vertices[0].position = { -0.5f, 0, 0.5f, 1 };
@@ -82,11 +75,17 @@ bool OpenGlApplication::Start() {
 	//unsigned int indices[6] = { 0, 1, 2, 2, 1, 3 };
 	//quadMesh.Initialise(4, vertices, 6, indices);
 
-	quadMesh.IntialiseQuad();
-	// make the quad 10 units wide
-	quadTransform = { 10,0,0,0,
-					  0,10,0,0,
-					  0,0,10,0,
+	grassMesh.IntialiseQuad();
+	grassTransform = {
+					  1,0,0,0,
+					  0,1,0,0,
+					  0,0,1,0,
+					  0,0,0,1
+	};
+	// make the spear 1 unit wide
+	spearTransform = { 1,0,0,0,
+					  0,1,0,0,
+					  0,0,1,0,
 					  0,0,0,1 };
 	//get current time
 	newTime = glfwGetTime();
@@ -122,7 +121,7 @@ bool OpenGlApplication::Update() {
 		glm::sin(newTime * 2), 0));
 	//do stuff, all game logic and drawing
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	angle += 0.001f;
+	angle += 0.0001f;
 
 	return true;
 };
@@ -162,23 +161,35 @@ void OpenGlApplication::Draw() {
 	////////
 	vec4 planes[6];
 	getFrustumPlanes(camera->GetProjection(), planes);
+	//bind spear shader
+	spearShader.bind();
+	spearShader.bindUniform("Ia", ambientLight);
+	spearShader.bindUniform("Id", light.diffuse);
+	spearShader.bindUniform("Is", light.specular);
+	spearShader.bindUniform("LightDirection", light.direction);
+	spearShader.bindUniform("specularPower", 25.f);
 
-	shader.bind();
-	shader.bindUniform("Ia", ambientLight);
-	shader.bindUniform("Id", light.diffuse);
-	shader.bindUniform("Is", light.specular);
-	shader.bindUniform("LightDirection", light.direction);
+	spearShader.bindUniform("cameraPosition",  camera->GetPosition());
 
-	shader.bindUniform("cameraPosition",  camera->GetPosition());
+	auto pvm = camera->GetProjection() * spearTransform;
+	spearShader.bindUniform("ProjectionViewModel", pvm);
 
-	auto pvm = camera->GetProjection() * quadTransform;
-	shader.bindUniform("ProjectionViewModel", pvm);
+	spearShader.bindUniform("NormalMatrix", glm::inverse(glm::mat3(spearTransform)));
 
-	shader.bindUniform("NormalMatrix", glm::inverse(glm::mat3(quadTransform)));
-	//quadMesh.Draw();
+	
 	//shader.bindUniform("diffuseTexture", 0);
 	gridTexture.bind(0);
-	bunnyMesh.draw();
+	spearMesh.draw();
+
+	// bind texturing shader
+	grassShader.bind();
+	pvm = camera->GetProjection() * grassTransform;
+	grassShader.bindUniform("ProjectionViewModel", pvm);
+	grassShader.bindUniform("diffuseTexture", 0);
+	grassTexture.bind(0);
+	grassMesh.Draw();
+
+
 
 	//BoundingSphere sphere;
 	//sphere.centre = vec3(0, cosf(glfwGetTime()) + 1, 0);
