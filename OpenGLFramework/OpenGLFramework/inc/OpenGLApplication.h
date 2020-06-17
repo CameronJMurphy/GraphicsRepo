@@ -57,6 +57,20 @@ private:
 	glm::mat4 grassTransform;
 	aie::Texture grassTexture;
 	
+	aie::ShaderProgram tiltedGrassShader;
+	Mesh tiltedGrassMesh;
+	glm::mat4 tiltedGrassTransform;
+	aie::Texture tiltedGrassTexture;
+
+	aie::ShaderProgram longGrassShader;
+	Mesh longGrassMesh;
+	glm::mat4 longGrassTransform;
+	aie::Texture longGrassTexture;
+
+	aie::ShaderProgram wallShader;
+	Mesh wallMesh;
+	glm::mat4 wallTransform;
+	aie::Texture wallTexture;
 
 	aie::RenderTarget renderTarget;
 
@@ -67,6 +81,7 @@ private:
 	};
 
 	Light light;
+	Light light2;
 	glm::vec3 ambientLight;
 public:
 	bool Start();

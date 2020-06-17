@@ -46,10 +46,26 @@ bool OpenGlApplication::Start() {
 	shader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/simple.frag");*/
 	//shader.loadShader(aie::eShaderStage::VERTEX, "shaders/textured.vert");
 	//shader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/textured.frag");
-	spearShader.loadShader(aie::eShaderStage::VERTEX, "shaders/phong.vert");
-	spearShader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/phong.frag");
+	spearShader.loadShader(aie::eShaderStage::VERTEX, "shaders/normalmap.vert");
+	spearShader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/normalmap.frag");
 	grassShader.loadShader(aie::eShaderStage::VERTEX, "shaders/textured.vert");
 	grassShader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/textured.frag");
+	wallShader.loadShader(aie::eShaderStage::VERTEX, "shaders/textured.vert");
+	wallShader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/textured.frag");
+	tiltedGrassShader.loadShader(aie::eShaderStage::VERTEX, "shaders/textured.vert");
+	tiltedGrassShader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/textured.frag");
+	longGrassShader.loadShader(aie::eShaderStage::VERTEX, "shaders/textured.vert");
+	longGrassShader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/textured.frag");
+	if (tiltedGrassShader.link() == false)
+	{
+		printf("Shader Error: %s\n", tiltedGrassShader.getLastError());
+		return false;
+	}
+	if (longGrassShader.link() == false)
+	{
+		printf("Shader Error: %s\n", longGrassShader.getLastError());
+		return false;
+	}
 	if (spearShader.link() == false)
 	{
 		printf("Shader Error: %s\n", spearShader.getLastError());
@@ -57,7 +73,12 @@ bool OpenGlApplication::Start() {
 	}
 	if (grassShader.link() == false)
 	{
-		printf("Shader Error: %s\n", spearShader.getLastError());
+		printf("Shader Error: %s\n", grassShader.getLastError());
+		return false;
+	}
+	if (wallShader.link() == false)
+	{
+		printf("Shader Error: %s\n", wallShader.getLastError());
 		return false;
 	}
 	if (spearMesh.load("meshes/soulspear/soulspear.obj",
@@ -65,7 +86,22 @@ bool OpenGlApplication::Start() {
 		printf("Soulspear Mesh Error!\n");
 		return false;
 	}
-	grassTexture.load("meshes/grass.jpg");
+	if (!grassTexture.load("meshes/grass.jpg"))
+	{
+		printf("grass texture Error!\n");
+	}
+	if (!wallTexture.load("meshes/wall.jpg"))
+	{
+		printf("wall texture Error!\n");
+	}
+	if (!tiltedGrassTexture.load("meshes/grass.jpg"))
+	{
+		printf("tiltedGrass texture Error!\n");
+	}
+	if (!longGrassTexture.load("meshes/grass.jpg"))
+	{
+		printf("longGrass texture Error!\n");
+	}
 	// define 4 vertices for 2 triangles
 	//Mesh::Vertex vertices[4];
 	//vertices[0].position = { -0.5f, 0, 0.5f, 1 };
@@ -74,6 +110,13 @@ bool OpenGlApplication::Start() {
 	//vertices[3].position = { 0.5f, 0, -0.5f, 1 };
 	//unsigned int indices[6] = { 0, 1, 2, 2, 1, 3 };
 	//quadMesh.Initialise(4, vertices, 6, indices);
+	wallMesh.IntialiseQuad();
+	wallTransform = {
+					  1,0,0,0,
+					  0,1,0,0,
+					  0,1,0,0,
+					  0,0,10,1
+	};
 
 	grassMesh.IntialiseQuad();
 	grassTransform = {
@@ -81,6 +124,21 @@ bool OpenGlApplication::Start() {
 					  0,1,0,0,
 					  0,0,1,0,
 					  0,0,0,1
+	};
+
+	longGrassMesh.IntialiseQuad();
+	longGrassTransform = {
+					  1,0,0,0,
+					  0,1,0,0,
+					  0,0,2,0,
+					  0,10,-40,1
+	};
+	tiltedGrassMesh.IntialiseQuad();
+	tiltedGrassTransform = {
+						  1,0,0,0,
+						  0,1,0,0,
+						  0,-1,1,0,
+						  0,0,-10,1
 	};
 	// make the spear 1 unit wide
 	spearTransform = { 1,0,0,0,
@@ -105,6 +163,8 @@ bool OpenGlApplication::Start() {
 	light.diffuse = { 1, 1, 0 };
 	light.specular = { 1, 1, 0 };
 	ambientLight = { 0.25f, 0.25f, 0.25f };
+	light2.diffuse = { 0, 1, 0 };
+	light2.specular = { 0, 1, 1 };
 
 	return true;
 };
@@ -119,6 +179,8 @@ bool OpenGlApplication::Update() {
 	// rotate light
 	light.direction = glm::normalize(vec3(glm::cos(newTime * 2),
 		glm::sin(newTime * 2), 0));
+	light2.direction = glm::normalize(vec3(glm::cos(newTime * 3),
+		glm::sin(newTime * 3), 0));
 	//do stuff, all game logic and drawing
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	angle += 0.0001f;
@@ -166,7 +228,7 @@ void OpenGlApplication::Draw() {
 	spearShader.bindUniform("Ia", ambientLight);
 	spearShader.bindUniform("Id", light.diffuse);
 	spearShader.bindUniform("Is", light.specular);
-	spearShader.bindUniform("LightDirection", light.direction);
+	spearShader.bindUniform("lightDirection", light.direction);
 	spearShader.bindUniform("specularPower", 25.f);
 
 	spearShader.bindUniform("cameraPosition",  camera->GetPosition());
@@ -181,16 +243,37 @@ void OpenGlApplication::Draw() {
 	gridTexture.bind(0);
 	spearMesh.draw();
 
-	// bind texturing shader
+	// bind grass shader
 	grassShader.bind();
 	pvm = camera->GetProjection() * grassTransform;
 	grassShader.bindUniform("ProjectionViewModel", pvm);
 	grassShader.bindUniform("diffuseTexture", 0);
-	grassTexture.bind(0);
+	grassTexture.bind(0);
 	grassMesh.Draw();
 
+	//bind wall shader
+	wallShader.bind();
+	pvm = camera->GetProjection() * wallTransform;
+	wallShader.bindUniform("ProjectionViewModel", pvm);
+	wallShader.bindUniform("diffuseTexture", 0);
+	wallTexture.bind(0);
+	wallMesh.Draw();
 
+	//bind titledGrass shader
+	tiltedGrassShader.bind();
+	pvm = camera->GetProjection() * tiltedGrassTransform;
+	tiltedGrassShader.bindUniform("ProjectionViewModel", pvm);
+	tiltedGrassShader.bindUniform("diffuseTexture", 0);
+	tiltedGrassTexture.bind(0);
+	tiltedGrassMesh.Draw();
 
+	//bind longGrass shader
+	longGrassShader.bind();
+	pvm = camera->GetProjection() * longGrassTransform;
+	longGrassShader.bindUniform("ProjectionViewModel", pvm);
+	longGrassShader.bindUniform("diffuseTexture", 0);
+	longGrassTexture.bind(0);
+	longGrassMesh.Draw();
 	//BoundingSphere sphere;
 	//sphere.centre = vec3(0, cosf(glfwGetTime()) + 1, 0);
 	//sphere.radius = 0.5f;
