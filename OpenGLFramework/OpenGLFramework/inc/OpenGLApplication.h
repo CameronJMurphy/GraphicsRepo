@@ -50,6 +50,11 @@ private:
 	aie::ShaderProgram spearShader;
 	aie::OBJMesh spearMesh;
 	glm::mat4 spearTransform;
+
+	aie::ShaderProgram minotaurShader;
+	aie::OBJMesh minotaurMesh;
+	glm::mat4 minotaurTransform;
+
 	aie::Texture gridTexture;
 
 	aie::ShaderProgram grassShader;
@@ -75,14 +80,16 @@ private:
 	aie::RenderTarget renderTarget;
 
 	struct Light {
-		glm::vec3 direction;
+		glm::vec3 position;
 		glm::vec3 diffuse;
 		glm::vec3 specular;
 	};
 
-	Light light;
-	Light light2;
+	Light lights[2];
 	glm::vec3 ambientLight;
+
+	float zPos = -50; //used for the moving minotaur pos
+	bool reached = false;
 public:
 	bool Start();
 	bool Update();
@@ -92,5 +99,8 @@ public:
 	Side SideOfPlaneSphere(glm::vec4 _plane, BoundingSphere _sphere);
 	void getFrustumPlanes(const glm::mat4& transform, glm::vec4* planes);
 	bool InRenderView(vec4 planes[], BoundingSphere _sphere);
-
+	void BindShaders();
+	void LoadShaders();
+	bool LinkShaders();
+	void SetMeshTransforms();
 };

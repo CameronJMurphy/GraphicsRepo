@@ -41,130 +41,27 @@ bool OpenGlApplication::Start() {
 	camera->SetPosition(cameraPosition);
 	camera->SetLookAt(camera->GetWorldPosition()[3], camera_target, glm::vec3(0, 1, 0));
 	camera->SetSpeed(cameraSpeed);
-	//Shaders
-	/*shader.loadShader(aie::eShaderStage::VERTEX, "shaders/simple.vert");
-	shader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/simple.frag");*/
-	//shader.loadShader(aie::eShaderStage::VERTEX, "shaders/textured.vert");
-	//shader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/textured.frag");
-	spearShader.loadShader(aie::eShaderStage::VERTEX, "shaders/normalmap.vert");
-	spearShader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/normalmap.frag");
-	grassShader.loadShader(aie::eShaderStage::VERTEX, "shaders/textured.vert");
-	grassShader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/textured.frag");
-	wallShader.loadShader(aie::eShaderStage::VERTEX, "shaders/textured.vert");
-	wallShader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/textured.frag");
-	tiltedGrassShader.loadShader(aie::eShaderStage::VERTEX, "shaders/textured.vert");
-	tiltedGrassShader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/textured.frag");
-	longGrassShader.loadShader(aie::eShaderStage::VERTEX, "shaders/textured.vert");
-	longGrassShader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/textured.frag");
-	if (tiltedGrassShader.link() == false)
+	//Load Shaders
+	LoadShaders();
+	//Try and load shaders
+	if (!LinkShaders())
 	{
-		printf("Shader Error: %s\n", tiltedGrassShader.getLastError());
-		return false;
+		return false; //end if failed
 	}
-	if (longGrassShader.link() == false)
-	{
-		printf("Shader Error: %s\n", longGrassShader.getLastError());
-		return false;
-	}
-	if (spearShader.link() == false)
-	{
-		printf("Shader Error: %s\n", spearShader.getLastError());
-		return false;
-	}
-	if (grassShader.link() == false)
-	{
-		printf("Shader Error: %s\n", grassShader.getLastError());
-		return false;
-	}
-	if (wallShader.link() == false)
-	{
-		printf("Shader Error: %s\n", wallShader.getLastError());
-		return false;
-	}
-	if (spearMesh.load("meshes/soulspear/soulspear.obj",
-		true, true) == false) {
-		printf("Soulspear Mesh Error!\n");
-		return false;
-	}
-	if (!grassTexture.load("meshes/grass.jpg"))
-	{
-		printf("grass texture Error!\n");
-	}
-	if (!wallTexture.load("meshes/wall.jpg"))
-	{
-		printf("wall texture Error!\n");
-	}
-	if (!tiltedGrassTexture.load("meshes/grass.jpg"))
-	{
-		printf("tiltedGrass texture Error!\n");
-	}
-	if (!longGrassTexture.load("meshes/grass.jpg"))
-	{
-		printf("longGrass texture Error!\n");
-	}
-	// define 4 vertices for 2 triangles
-	//Mesh::Vertex vertices[4];
-	//vertices[0].position = { -0.5f, 0, 0.5f, 1 };
-	//vertices[1].position = { 0.5f, 0, 0.5f, 1 };
-	//vertices[2].position = { -0.5f, 0, -0.5f, 1 };
-	//vertices[3].position = { 0.5f, 0, -0.5f, 1 };
-	//unsigned int indices[6] = { 0, 1, 2, 2, 1, 3 };
-	//quadMesh.Initialise(4, vertices, 6, indices);
-	wallMesh.IntialiseQuad();
-	wallTransform = {
-					  1,0,0,0,
-					  0,1,0,0,
-					  0,1,0,0,
-					  0,0,10,1
-	};
+	//Set meshes to their correct transforms
+	SetMeshTransforms();
 
-	grassMesh.IntialiseQuad();
-	grassTransform = {
-					  1,0,0,0,
-					  0,1,0,0,
-					  0,0,1,0,
-					  0,0,0,1
-	};
-
-	longGrassMesh.IntialiseQuad();
-	longGrassTransform = {
-					  1,0,0,0,
-					  0,1,0,0,
-					  0,0,2,0,
-					  0,10,-40,1
-	};
-	tiltedGrassMesh.IntialiseQuad();
-	tiltedGrassTransform = {
-						  1,0,0,0,
-						  0,1,0,0,
-						  0,-1,1,0,
-						  0,0,-10,1
-	};
-	// make the spear 1 unit wide
-	spearTransform = { 1,0,0,0,
-					  0,1,0,0,
-					  0,0,1,0,
-					  0,0,0,1 };
 	//get current time
 	newTime = glfwGetTime();
 	//set up plane
 	plane = vec4(0, 1, 0, -1);
-	////
 
-	//// load imaginary texture
-	//aie::Texture texture1;
-	//texture1.load("mytexture.png");
-	//// create a 2x2 black-n-white checker texture
-	//// RED simply means one colour channel, i.e. grayscale
-	//aie::Texture texture2;
-	//unsigned char texelData[4] = { 0, 255, 255, 0 };
-	//texture2.create(2, 2, aie::Texture::RED, texelData);
-
-	light.diffuse = { 1, 1, 0 };
-	light.specular = { 1, 1, 0 };
+	lights[0].diffuse = { 1, 1, 1 };
+	lights[0].specular = { 0.5, 0.5, 0.5 };
+	
+	lights[1].diffuse = { 3, 3, 3 };
+	lights[1].specular = { 1, 1, 1 };
 	ambientLight = { 0.25f, 0.25f, 0.25f };
-	light2.diffuse = { 0, 1, 0 };
-	light2.specular = { 0, 1, 1 };
 
 	return true;
 };
@@ -177,10 +74,36 @@ bool OpenGlApplication::Update() {
 	newTime = glfwGetTime();
 	deltaTime = newTime - oldTime;
 	// rotate light
-	light.direction = glm::normalize(vec3(glm::cos(newTime * 2),
+	lights[0].position = glm::normalize(vec3(glm::cos(newTime * 2),
 		glm::sin(newTime * 2), 0));
-	light2.direction = glm::normalize(vec3(glm::cos(newTime * 3),
+	lights[1].position = glm::normalize(vec3(glm::cos(newTime * 3),
 		glm::sin(newTime * 3), 0));
+
+	//make minotaur walk
+	float movespeed = 10 * deltaTime;
+	if (!reached) //if he hasnt reached his point keep walking
+	{
+		zPos = zPos + movespeed;
+		if (zPos > -25)
+			reached = true;
+		minotaurTransform = { 5,0,0,0,
+				   0,5,0,0,
+				   0,0,5,0,
+				   0,10,zPos,1 };
+	}	
+	else //else walk to the other point
+	{
+		zPos = zPos - movespeed;
+		if (zPos < -50)
+			reached = false;
+		minotaurTransform = { 5,0,0,0,
+				   0,5,0,0,
+				   0,0,-5,0,
+				   0,10,zPos,1 };
+	}
+
+	
+	
 	//do stuff, all game logic and drawing
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	angle += 0.0001f;
@@ -189,117 +112,26 @@ bool OpenGlApplication::Update() {
 };
 void OpenGlApplication::Draw() {
 
+	//setup Camera
 	camera->SetLookAt(camera->GetWorldPosition()[3], camera_target, glm::vec3(0, 1, 0));
 	camera->SetPerspective(zoom, 1280.f / 720.f, 0.1f, 1000.f);
 
+	//clear 
 	aie::Gizmos::clear();
 	aie::Gizmos::addTransform(glm::translate(camera_target));
 
 
-	//shader.bind();
-	//auto pvm = camera->GetProjection() * quadTransform;
-	//shader.bindUniform("ProjectionViewModel", pvm);
-	//quadMesh.Draw();
-	//aie::Gizmos::addSphere(vec3{ 0 }, 1.1, 12, 16, vec4{ 1.0f,1.0f, 0.2f, 1.0f });
-	//auto earth_move = glm::translate(camera_target);
-	//auto earth_rotate = glm::rotate(angle, vec3(0, 1, 0));
-	//auto earth_spin = glm::rotate(-angle * 2.0f, vec3(0, 1, 0));
-
-	//auto earth_final = earth_rotate * earth_move * earth_spin;
-	//aie::Gizmos::addSphere(vec3{ 0 }, 0.3, 12, 16, vec4{ 0.0f,0.3f, 0.8f, 1.0f }, &earth_final);
-
-	//const vec4 white(1);
-	//const vec4 black(0, 0, 0, 1);
-
-	//for (int i = 0; i < 21; ++i) {
-	//	aie::Gizmos::addLine(vec3(-10 + i, 0, 10),
-	//		vec3(-10 + i, 0, -10),
-	//		i == 10 ? white : black);
-	//	aie::Gizmos::addLine(vec3(10, 0, -10 + i),
-	//		vec3(-10, 0, -10 + i),
-	//		i == 10 ? white : black);
-	//}
-
-	////////
+	//set up bounding box
 	vec4 planes[6];
 	getFrustumPlanes(camera->GetProjection(), planes);
-	//bind spear shader
-	spearShader.bind();
-	spearShader.bindUniform("Ia", ambientLight);
-	spearShader.bindUniform("Id", light.diffuse);
-	spearShader.bindUniform("Is", light.specular);
-	spearShader.bindUniform("lightDirection", light.direction);
-	spearShader.bindUniform("specularPower", 25.f);
 
-	spearShader.bindUniform("cameraPosition",  camera->GetPosition());
+	//Bind our Shaders and textures
+	BindShaders();
 
-	auto pvm = camera->GetProjection() * spearTransform;
-	spearShader.bindUniform("ProjectionViewModel", pvm);
-
-	spearShader.bindUniform("NormalMatrix", glm::inverse(glm::mat3(spearTransform)));
-
-	
-	//shader.bindUniform("diffuseTexture", 0);
-	gridTexture.bind(0);
-	spearMesh.draw();
-
-	// bind grass shader
-	grassShader.bind();
-	pvm = camera->GetProjection() * grassTransform;
-	grassShader.bindUniform("ProjectionViewModel", pvm);
-	grassShader.bindUniform("diffuseTexture", 0);
-	grassTexture.bind(0);
-	grassMesh.Draw();
-
-	//bind wall shader
-	wallShader.bind();
-	pvm = camera->GetProjection() * wallTransform;
-	wallShader.bindUniform("ProjectionViewModel", pvm);
-	wallShader.bindUniform("diffuseTexture", 0);
-	wallTexture.bind(0);
-	wallMesh.Draw();
-
-	//bind titledGrass shader
-	tiltedGrassShader.bind();
-	pvm = camera->GetProjection() * tiltedGrassTransform;
-	tiltedGrassShader.bindUniform("ProjectionViewModel", pvm);
-	tiltedGrassShader.bindUniform("diffuseTexture", 0);
-	tiltedGrassTexture.bind(0);
-	tiltedGrassMesh.Draw();
-
-	//bind longGrass shader
-	longGrassShader.bind();
-	pvm = camera->GetProjection() * longGrassTransform;
-	longGrassShader.bindUniform("ProjectionViewModel", pvm);
-	longGrassShader.bindUniform("diffuseTexture", 0);
-	longGrassTexture.bind(0);
-	longGrassMesh.Draw();
-	//BoundingSphere sphere;
-	//sphere.centre = vec3(0, cosf(glfwGetTime()) + 1, 0);
-	//sphere.radius = 0.5f;
-	//vec4 plane(0, 1, 0, -1);
-	//if (InRenderView(planes, sphere))
-	//{
-	//	aie::Gizmos::addSphere(sphere.centre, sphere.radius,
-	//		8, 8, vec4(1, 0, 1, 1));
-	//}
-	//vec4 planeColour(1, 1, 0, 1);
-	//if (SideOfPlaneSphere(plane, sphere) == Side::InFront)
-	//{
-	//	planeColour = vec4(0, 1, 0, 1);
-	//}
-	//else if (SideOfPlaneSphere(plane, sphere) == Side::Behind)
-	//{
-	//	planeColour = vec4(1, 0, 0, 1);
-	//}
-	//aie::Gizmos::addTri(vec3(4, 1, 4), vec3(-4, 1, -4), vec3(-4, 1, 4),
-	//	planeColour);
-	//aie::Gizmos::addTri(vec3(4, 1, 4), vec3(4, 1, -4), vec3(-4, 1, -4),
-	//	planeColour);
-
-
-
+	//Update the camera
 	camera->Update(deltaTime);
+
+	//draw to screen
 	aie::Gizmos::draw(camera->GetProjection());
 
 	glfwSwapBuffers(window);
@@ -313,6 +145,7 @@ void OpenGlApplication::Exit() {
 	glfwTerminate();
 };
 
+//not used
 Side OpenGlApplication::SideOfPlanePoint(glm::vec4 _plane, glm::vec3 point)
 {
 	float d = glm::dot(vec3(_plane), point) + _plane.w;
@@ -332,7 +165,7 @@ Side OpenGlApplication::SideOfPlanePoint(glm::vec4 _plane, glm::vec3 point)
 		return Side::OnSurface;
 	}
 }
-
+//not used
 Side OpenGlApplication::SideOfPlaneSphere(glm::vec4 _plane, BoundingSphere _sphere)
 {
 	float d = glm::dot(vec3(_plane), _sphere.centre) + _plane.w;
@@ -349,7 +182,7 @@ Side OpenGlApplication::SideOfPlaneSphere(glm::vec4 _plane, BoundingSphere _sphe
 		return Side::OnSurface;
 	}
 }
-
+//not used
 void OpenGlApplication::getFrustumPlanes(const glm::mat4& transform, glm::vec4* planes) {
 	// right side
 	planes[0] = vec4(transform[0][3] - transform[0][0],
@@ -387,7 +220,7 @@ void OpenGlApplication::getFrustumPlanes(const glm::mat4& transform, glm::vec4* 
 		planes[i] /= d;
 	}
 }
-
+//not used
 bool OpenGlApplication::InRenderView(vec4 planes[], BoundingSphere _sphere)
 {
 	for (int i = 0; i < 6; i++) {
@@ -408,4 +241,191 @@ bool OpenGlApplication::InRenderView(vec4 planes[], BoundingSphere _sphere)
 			return true;
 		}
 	}
+}
+
+void OpenGlApplication::BindShaders()
+{
+	//bind spear shader
+	spearShader.bind();
+	spearShader.bindUniform("Ia", ambientLight);
+	for (int i = 0; i < 2; ++i)//give to lights to the shader
+	{
+		spearShader.bindUniform("Id", lights[i].diffuse);
+		spearShader.bindUniform("Is", lights[i].specular);
+		spearShader.bindUniform("lightPosition", lights[i].position);
+	}
+	spearShader.bindUniform("specularPower", 25.f);
+	spearShader.bindUniform("cameraPosition", camera->GetPosition());
+	auto pvm = camera->GetProjection() * spearTransform;
+	spearShader.bindUniform("ProjectionViewModel", pvm);
+	spearShader.bindUniform("NormalMatrix", glm::inverse(glm::mat3(spearTransform)));
+	spearMesh.draw();
+
+	//bind minotaur shader
+	minotaurShader.bind();
+	minotaurShader.bindUniform("Ia", ambientLight);
+	for (int i = 0; i < 2; ++i)//give to lights to the shader
+	{
+		minotaurShader.bindUniform("Id", lights[i].diffuse);
+		minotaurShader.bindUniform("Is", lights[i].specular);
+		minotaurShader.bindUniform("lightPosition", lights[i].position);
+	}
+	minotaurShader.bindUniform("specularPower", 25.f);
+	minotaurShader.bindUniform("cameraPosition", camera->GetPosition());
+	pvm = camera->GetProjection() * minotaurTransform;
+	minotaurShader.bindUniform("ProjectionViewModel", pvm);
+	minotaurShader.bindUniform("NormalMatrix", glm::inverse(glm::mat3(minotaurTransform)));
+	minotaurMesh.draw();
+
+	// bind grass shader
+	grassShader.bind();
+	pvm = camera->GetProjection() * grassTransform;
+	grassShader.bindUniform("ProjectionViewModel", pvm);
+	grassShader.bindUniform("diffuseTexture", 0);
+	grassTexture.bind(0);
+	grassMesh.Draw();
+
+	//bind wall shader
+	wallShader.bind();
+	pvm = camera->GetProjection() * wallTransform;
+	wallShader.bindUniform("ProjectionViewModel", pvm);
+	wallShader.bindUniform("diffuseTexture", 0);
+	wallTexture.bind(0);
+	wallMesh.Draw();
+
+	//bind titledGrass shader
+	tiltedGrassShader.bind();
+	pvm = camera->GetProjection() * tiltedGrassTransform;
+	tiltedGrassShader.bindUniform("ProjectionViewModel", pvm);
+	tiltedGrassShader.bindUniform("diffuseTexture", 0);
+	tiltedGrassTexture.bind(0);
+	tiltedGrassMesh.Draw();
+
+	//bind longGrass shader
+	longGrassShader.bind();
+	pvm = camera->GetProjection() * longGrassTransform;
+	longGrassShader.bindUniform("ProjectionViewModel", pvm);
+	longGrassShader.bindUniform("diffuseTexture", 0);
+	longGrassTexture.bind(0);
+	longGrassMesh.Draw();
+}
+
+void OpenGlApplication::LoadShaders()
+{
+	//Shaders
+	spearShader.loadShader(aie::eShaderStage::VERTEX, "shaders/normalmap.vert");
+	spearShader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/normalmap.frag");
+	minotaurShader.loadShader(aie::eShaderStage::VERTEX, "shaders/normalmap.vert");
+	minotaurShader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/normalmap.frag");
+	grassShader.loadShader(aie::eShaderStage::VERTEX, "shaders/textured.vert");
+	grassShader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/textured.frag");
+	wallShader.loadShader(aie::eShaderStage::VERTEX, "shaders/textured.vert");
+	wallShader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/textured.frag");
+	tiltedGrassShader.loadShader(aie::eShaderStage::VERTEX, "shaders/textured.vert");
+	tiltedGrassShader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/textured.frag");
+	longGrassShader.loadShader(aie::eShaderStage::VERTEX, "shaders/textured.vert");
+	longGrassShader.loadShader(aie::eShaderStage::FRAGMENT, "shaders/textured.frag");
+}
+
+bool OpenGlApplication::LinkShaders()
+{
+	if (tiltedGrassShader.link() == false)
+	{
+		printf("Shader Error: %s\n", tiltedGrassShader.getLastError());
+		return false;
+	}
+	if (longGrassShader.link() == false)
+	{
+		printf("Shader Error: %s\n", longGrassShader.getLastError());
+		return false;
+	}
+	if (spearShader.link() == false)
+	{
+		printf("Shader Error: %s\n", spearShader.getLastError());
+		return false;
+	}
+	if (minotaurShader.link() == false)
+	{
+		printf("Shader Error: %s\n", spearShader.getLastError());
+		return false;
+	}
+	if (grassShader.link() == false)
+	{
+		printf("Shader Error: %s\n", grassShader.getLastError());
+		return false;
+	}
+	if (wallShader.link() == false)
+	{
+		printf("Shader Error: %s\n", wallShader.getLastError());
+		return false;
+	}
+	if (spearMesh.load("meshes/soulspear/soulspear.obj",
+		true, true) == false) {
+		printf("Soulspear Mesh Error!\n");
+		return false;
+	}
+	if (minotaurMesh.load("meshes/Minotaur/Minotaur_04.obj",
+		true, true) == false) {
+		printf("Minotaur Mesh Error!\n");
+		return false;
+	}
+	if (!grassTexture.load("meshes/grass.jpg"))
+	{
+		printf("grass texture Error!\n");
+	}
+	if (!wallTexture.load("meshes/wall.jpg"))
+	{
+		printf("wall texture Error!\n");
+	}
+	if (!tiltedGrassTexture.load("meshes/grass.jpg"))
+	{
+		printf("tiltedGrass texture Error!\n");
+	}
+	if (!longGrassTexture.load("meshes/grass.jpg"))
+	{
+		printf("longGrass texture Error!\n");
+	}
+}
+
+void OpenGlApplication::SetMeshTransforms()
+{
+	wallMesh.IntialiseQuad();
+	wallTransform = {
+					  1,0,0,0,
+					  0,1,0,0,
+					  0,1,0,0,
+					  0,0,10,1
+	};
+
+	grassMesh.IntialiseQuad();
+	grassTransform = {
+					  1,0,0,0,
+					  0,1,0,0,
+					  0,0,1,0,
+					  0,0,0,1
+	};
+
+	longGrassMesh.IntialiseQuad();
+	longGrassTransform = {
+					  1,0,0,0,
+					  0,1,0,0,
+					  0,0,2,0,
+					  0,10,-40,1
+	};
+	tiltedGrassMesh.IntialiseQuad();
+	tiltedGrassTransform = {
+						  1,0,0,0,
+						  0,1,0,0,
+						  0,-1,1,0,
+						  0,0,-10,1
+	};
+	spearTransform = { 1,0,0,0,
+					  0,1,0,0,
+					  0,0,1,0,
+					  0,0,0,1 };
+
+	minotaurTransform = { 5,0,0,0,
+					   0,5,0,0,
+					   0,0,5,0,
+					   0,10,-50,1 };
 }
