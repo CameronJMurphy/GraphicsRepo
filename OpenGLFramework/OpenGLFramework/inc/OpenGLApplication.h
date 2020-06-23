@@ -47,6 +47,7 @@ private:
 	float oldTime;
 	glm::vec4 plane;
 
+	////////SCENE OBJECTS////////
 	aie::ShaderProgram spearShader;
 	aie::OBJMesh spearMesh;
 	glm::mat4 spearTransform;
@@ -57,6 +58,7 @@ private:
 
 	aie::Texture gridTexture;
 
+	////////GRASS////////
 	aie::ShaderProgram grassShader;
 	Mesh grassMesh;
 	glm::mat4 grassTransform;
@@ -72,10 +74,36 @@ private:
 	glm::mat4 longGrassTransform;
 	aie::Texture longGrassTexture;
 
+	////////WALLS////////
 	aie::ShaderProgram wallShader;
 	Mesh wallMesh;
 	glm::mat4 wallTransform;
 	aie::Texture wallTexture;
+
+	aie::ShaderProgram wall1Shader;
+	Mesh wall1Mesh;
+	glm::mat4 wall1Transform;
+	aie::Texture wall1Texture;
+
+	aie::ShaderProgram wall2Shader;
+	Mesh wall2Mesh;
+	glm::mat4 wall2Transform;
+	aie::Texture wall2Texture;
+
+	aie::ShaderProgram wall3Shader;
+	Mesh wall3Mesh;
+	glm::mat4 wall3Transform;
+	aie::Texture wall3Texture;
+
+	aie::ShaderProgram wall4Shader;
+	Mesh wall4Mesh;
+	glm::mat4 wall4Transform;
+	aie::Texture wall4Texture;
+
+	aie::ShaderProgram wall5Shader;
+	Mesh wall5Mesh;
+	glm::mat4 wall5Transform;
+	aie::Texture wall5Texture;
 
 	aie::RenderTarget renderTarget;
 
@@ -103,4 +131,5 @@ public:
 	void LoadShaders();
 	bool LinkShaders();
 	void SetMeshTransforms();
+	bool LoadTextures();
 };
